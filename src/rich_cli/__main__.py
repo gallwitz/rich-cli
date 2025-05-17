@@ -50,6 +50,7 @@ RULE = 6
 INSPECT = 7
 CSV = 8
 IPYNB = 9
+IMAGE = 10
 
 
 def on_error(message: str, error: Optional[Exception] = None, code=-1) -> NoReturn:
@@ -160,6 +161,50 @@ def blend_text(
     return text
 
 
+def render_image_ascii(path: str, width: int) -> Text:
+    """Render an image as ASCII art.
+
+    Args:
+        path (str): Path or URL to the image.
+        width (int): Width in characters of the output.
+
+    Returns:
+        Text: Renderable text containing the ASCII art.
+    """
+
+    from io import BytesIO
+    from PIL import Image
+
+    ASCII_CHARS = " .:-=+*#%@"
+
+    if path.startswith(("http://", "https://")):
+        import requests
+
+        response = requests.get(path)
+        response.raise_for_status()
+        image = Image.open(BytesIO(response.content))
+    else:
+        image = Image.open(path)
+
+    image = image.convert("L")
+    aspect_ratio = image.height / image.width
+    height = max(1, int(aspect_ratio * width * 0.55))
+    image = image.resize((width, height))
+
+    pixels = list(image.getdata())
+    chars = [ASCII_CHARS[pixel * (len(ASCII_CHARS) - 1) // 255] for pixel in pixels]
+
+    ascii_text = Text()
+    for y in range(height):
+        start = y * width
+        end = start + width
+        ascii_text.append("".join(chars[start:end]))
+        if y < height - 1:
+            ascii_text.append("\n")
+
+    return ascii_text
+
+
 class RichCommand(click.Command):
     """Override Clicks help with a Richer version."""
 
@@ -259,6 +304,13 @@ class RichCommand(click.Command):
 @click.option("--rst", is_flag=True, help="Display [u]restructured text[/u].")
 @click.option("--csv", is_flag=True, help="Display [u]CSV[/u] as a table.")
 @click.option("--ipynb", is_flag=True, help="Display [u]Jupyter notebook[/u].")
+@click.option(
+    "--image",
+    "-i",
+    "ascii_image",
+    is_flag=True,
+    help="Preview JPG/PNG images as ASCII art.",
+)
 @click.option("--syntax", is_flag=True, help="[u]Syntax[/u] highlighting.")
 @click.option("--inspect", is_flag=True, help="[u]Inspect[/u] a python object.")
 @click.option(
@@ -409,6 +461,7 @@ def main(
     rst: bool = False,
     csv: bool = False,
     ipynb: bool = False,
+    ascii_image: bool = False,
     inspect: bool = True,
     emoji: bool = False,
     left: bool = False,
@@ -494,6 +547,8 @@ def main(
         resource_format = RST
     elif ipynb:
         resource_format = IPYNB
+    elif ascii_image:
+        resource_format = IMAGE
 
     if resource_format == AUTO and "." in resource:
         import os.path
@@ -521,6 +576,8 @@ def main(
             resource_format = RST
         elif ext == ".ipynb":
             resource_format = IPYNB
+        elif ext in (".png", ".jpg", ".jpeg"):
+            resource_format = IMAGE
 
     if resource_format == AUTO:
         resource_format = SYNTAX
@@ -622,6 +679,13 @@ def main(
             guides,
             no_wrap,
         )
+
+    elif resource_format == IMAGE:
+        img_width = width if width > 0 else console.width
+        try:
+            renderable = render_image_ascii(resource, img_width)
+        except Exception as error:
+            on_error("unable to read image", error)
 
     else:
         if not resource:
