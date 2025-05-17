@@ -175,13 +175,17 @@ rich https://raw.githubusercontent.com/Textualize/rich-cli/main/README.md --mark
 
 ## Exporting
 
-In addition to rendering to the console, `rich` can write an HTML file. This works with any command. Add `--export-html` or `-o` followed by the output path.
+In addition to rendering to the console, `rich` can write an HTML file. This works with any command. Add `--export-html` or `-o` followed by the output path. You can also export to PDF with `--export-pdf` and a file name.
 
 ```
 rich README.md -o readme.html
 ```
 
-After running this command you should find a "readme.html" in your current working directory.
+After running this command you should find a "readme.html" in your current working directory. To save a PDF, run:
+
+```
+rich README.md --export-pdf readme.pdf
+```
 
 ## Rich Printing
 

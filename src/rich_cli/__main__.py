@@ -447,6 +447,9 @@ class RichCommand(click.Command):
 @click.option(
     "--export-svg", metavar="PATH", default="", help="Write SVG to [b]PATH[/b]."
 )
+@click.option(
+    "--export-pdf", metavar="PATH", default="", help="Write PDF to [b]PATH[/b]."
+)
 @click.option("--pager", is_flag=True, help="Display in an interactive pager.")
 @click.option("--version", "-v", is_flag=True, help="Print version and exit.")
 def main(
@@ -493,6 +496,7 @@ def main(
     force_terminal: bool = False,
     export_html: str = "",
     export_svg: str = "",
+    export_pdf: str = "",
     pager: bool = False,
 ):
     """Rich toolbox for console output."""
@@ -501,7 +505,7 @@ def main(
         return
     console = Console(
         emoji=emoji,
-        record=bool(export_html or export_svg),
+        record=bool(export_html or export_svg or export_pdf),
         force_terminal=force_terminal if force_terminal else None,
     )
 
@@ -795,6 +799,12 @@ def main(
             console.save_svg(export_svg, clear=False)
         except Exception as error:
             on_error("failed to save SVG", error)
+
+    if export_pdf:
+        try:
+            console.save_pdf(export_pdf, clear=False)
+        except Exception as error:
+            on_error("failed to save PDF", error)
 
 
 def render_csv(
