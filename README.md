@@ -131,6 +131,14 @@ rich deniro.csv
 
 ![csv1](https://raw.githubusercontent.com/Textualize/rich-cli/main/imgs/csv1.png)
 
+## Image Preview
+
+Use `--image` or `-i` to render a JPG or PNG as ASCII art in the terminal.
+
+```
+rich picture.jpg --image
+```
+
 ### Rules
 
 You can render a horizontal rule with `--rule` or `-u`. Specify a rule style with `--rule-style`. Set the character(s) to render the line with `--rule-char`.
