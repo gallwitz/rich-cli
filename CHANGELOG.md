@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Rich-CLI now assumes that the input file is encoded in UTF-8 https://github.com/Textualize/rich-cli/pull/56
 
+### Added
+
+- Added `--export-pdf` option
+
 ## [1.8.0] - 2022-05-07
 
 ### Changed
